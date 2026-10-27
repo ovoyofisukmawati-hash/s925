@@ -79,42 +79,12 @@ Native PHP backend untuk frontend aplikasi S925.
 ```http
 Authorization: Bearer <token>
 ```
-- Response:
-```json
-{
-  "ok": true,
-  "user": {
-    "id": 1,
-    "name": "Rizki",
-    "email": "rizki@example.com",
-    "phone": "081234567890",
-    "role": "CUSTOMER",
-    "is_active": 1,
-    "created_at": "2026-10-27 08:00:00"
-  }
-}
-```
 
 ### 2. Catalog
 
 #### 2.1 List categories
 - Method: `GET`
 - URL: `/api/catalog/categories`
-- Response:
-```json
-{
-  "ok": true,
-  "categories": [
-    {
-      "id": 1,
-      "name": "Perhiasan",
-      "slug": "perhiasan",
-      "description": "Collection perhiasan",
-      "product_count": 5
-    }
-  ]
-}
-```
 
 #### 2.2 Create category
 - Method: `POST`
@@ -143,60 +113,10 @@ Authorization: Bearer <admin_token>
   - `/api/catalog/products?featured=true`
   - `/api/catalog/products?category=perhiasan`
   - `/api/catalog/products?search=cincin`
-- Response:
-```json
-{
-  "ok": true,
-  "products": [
-    {
-      "id": 1,
-      "category_id": 1,
-      "category_name": "Perhiasan",
-      "category_slug": "perhiasan",
-      "name": "Cincin Silver 925",
-      "slug": "cincin-silver-925",
-      "description": "Cincin premium silver 925",
-      "price": "500000.00",
-      "compare_price": "700000.00",
-      "stock": 10,
-      "is_featured": 1,
-      "is_active": 1,
-      "images": [
-        {
-          "id": 1,
-          "product_id": 1,
-          "url": "https://example.com/image.jpg",
-          "alt_text": "Cincin silver"
-        }
-      ],
-      "avg_rating": 4.5,
-      "total_reviews": 2
-    }
-  ]
-}
-```
 
 #### 2.4 Get product by id
 - Method: `GET`
 - URL: `/api/catalog/products?id=1`
-- Response:
-```json
-{
-  "ok": true,
-  "product": {
-    "id": 1,
-    "name": "Cincin Silver 925",
-    "description": "...",
-    "price": "500000.00",
-    "compare_price": "700000.00",
-    "stock": 10,
-    "images": [],
-    "reviews": [],
-    "avg_rating": 0,
-    "total_reviews": 0
-  }
-}
-```
 
 #### 2.5 Create product
 - Method: `POST`
@@ -275,12 +195,6 @@ Authorization: Bearer <token>
 ```http
 Authorization: Bearer <token>
 ```
-- Body:
-```json
-{
-  "quantity": 3
-}
-```
 
 #### 3.4 Remove cart item
 - Method: `DELETE`
@@ -348,23 +262,63 @@ Authorization: Bearer <token>
 }
 ```
 
-### 4. Admin
+### 4. Admin dashboard & order management
 
 #### 4.1 Dashboard overview
 - Method: `GET`
-- URL: `/api/admin/overview`
+- URL: `/api/admin/dashboard`
 - Role: admin
 - Header:
 ```http
 Authorization: Bearer <admin_token>
 ```
+- Response sample:
+```json
+{
+  "ok": true,
+  "metrics": {
+    "totalUsers": 12,
+    "totalProducts": 25,
+    "totalOrders": 7,
+    "totalRevenue": 25000000,
+    "pendingOrders": 3,
+    "lowStockProducts": 5
+  },
+  "recentOrders": [
+    {
+      "id": 7,
+      "user_id": 1,
+      "total": "1000000.00",
+      "user_name": "Rizki",
+      "email": "rizki@example.com"
+    }
+  ],
+  "topProducts": [
+    {
+      "id": 1,
+      "name": "Cincin Silver 925",
+      "price": "500000.00",
+      "total_sold": 2,
+      "quantity_sold": 5
+    }
+  ],
+  "salesTrend": [
+    { "date": "2026-10-20", "revenue": "1500000.00" }
+  ]
+}
+```
 
-#### 4.2 List users
+#### 4.2 Overview alias (legacy)
+- Method: `GET`
+- URL: `/api/admin/overview`
+- Role: admin
+
+#### 4.3 List users
 - Method: `GET`
 - URL: `/api/admin/users`
 - Role: admin
 
-#### 4.3 Update user role
+#### 4.4 Update user role
 - Method: `PATCH`
 - URL: `/api/admin/users?id=2`
 - Role: admin
@@ -374,6 +328,46 @@ Authorization: Bearer <admin_token>
   "role": "ADMIN"
 }
 ```
+
+#### 4.5 List orders
+- Method: `GET`
+- URL: `/api/admin/orders`
+- Role: admin
+- Response contains order items and customer details.
+
+#### 4.6 Get order detail
+- Method: `GET`
+- URL: `/api/admin/orders/7`
+- Role: admin
+
+#### 4.7 Update order status
+- Method: `PATCH`
+- URL: `/api/admin/orders?id=7`
+- Role: admin
+- Body example:
+```json
+{
+  "status": "SHIPPED",
+  "paymentStatus": "SUCCESS"
+}
+```
+- Valid order statuses:
+  - `PENDING`
+  - `PAID`
+  - `PACKED`
+  - `SHIPPED`
+  - `DELIVERED`
+  - `CANCELLED`
+- Valid payment statuses:
+  - `PENDING`
+  - `SUCCESS`
+  - `FAILED`
+  - `REFUNDED`
+
+#### 4.8 List customer messages
+- Method: `GET`
+- URL: `/api/admin/contacts`
+- Role: admin
 
 ## Status code umum
 - `200 OK`
@@ -399,8 +393,6 @@ Backend ini dibuat untuk frontend agar mudah dipanggil dengan JSON dan JWT. Untu
 - `controllers/CustomerController.php`
 - `controllers/AdminController.php`
 
-## Arsip / catatan
-- Akses API via: `http://localhost:8000/api`
-- Admin default:
-  - Email: `admin@s925.com`
-  - Password: `password`
+## Admin default
+- Email: `admin@s925.com`
+- Password: `password`
