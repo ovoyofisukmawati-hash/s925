@@ -1,0 +1,8 @@
+# Prisma
+# Generate client: npx prisma generate
+# Run migration: npx prisma migrate dev --name init
+
+node_modules/
+.env
+.DS_Store
+npm-debug.log*
